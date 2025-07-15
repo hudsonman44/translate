@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Audio Transcription</title>
+    <title>Audio File Transcription</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Style for the file input button */
+        input[type="file"]::file-selector-button {
+            @apply font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border-0 py-2 px-4 rounded-lg cursor-pointer transition-colors duration-200;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
     <div class="container mx-auto max-w-2xl px-4 py-12">
         <div class="bg-white rounded-2xl shadow-lg p-8">
-            <h1 class="text-3xl font-bold text-center mb-2 text-gray-900">YouTube Audio Transcription</h1>
-            <p class="text-center text-gray-500 mb-8">Enter a YouTube video URL to transcribe its audio.</p>
+            <h1 class="text-3xl font-bold text-center mb-2 text-gray-900">Audio File Transcription</h1>
+            <p class="text-center text-gray-500 mb-8">Upload an audio or video file to transcribe its content.</p>
 
             <form id="transcription-form" class="space-y-6">
                 <div>
-                    <label for="youtube-url" class="block text-sm font-medium text-gray-700 mb-1">YouTube Video URL</label>
-                    <input type="url" id="youtube-url" name="youtube-url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="https://www.youtube.com/watch?v=..." required>
+                    <label for="audio-file" class="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
+                    <input type="file" id="audio-file" name="audio-file" class="w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer" accept="audio/*,video/mp4" required>
                 </div>
 
                 <div>
-                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language (Optional)</label>
                     <select id="language" name="language" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                         <option value="en">English</option>
                         <option value="es">Spanish</option>
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Whisper will auto-detect the language, but you can provide a hint.</p>
                 </div>
 
                 <div>
@@ -59,7 +64,7 @@
 
     <script>
         const transcriptionForm = document.getElementById('transcription-form');
-        const youtubeUrlInput = document.getElementById('youtube-url');
+        const audioFileInput = document.getElementById('audio-file');
         const languageSelect = document.getElementById('language');
         const transcriptionOutput = document.getElementById('transcription-output');
         const translateButton = document.getElementById('translate-button');
@@ -71,6 +76,13 @@
         transcriptionForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            const file = audioFileInput.files[0];
+            if (!file) {
+                errorMessage.textContent = 'Please select a file to upload.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
             // Reset UI state
             transcriptionOutput.value = '';
             errorMessage.classList.add('hidden');
@@ -79,21 +91,15 @@
             buttonText.textContent = 'Transcribing...';
             loadingSpinner.classList.remove('hidden');
 
-            const youtubeUrl = youtubeUrlInput.value;
-            const language = languageSelect.value;
+            const formData = new FormData();
+            formData.append('audio', file);
+            formData.append('language', languageSelect.value);
 
             try {
-                // We will call our worker endpoint here.
-                // For local development, this might be http://localhost:8787
+                // Call our worker endpoint.
                 const response = await fetch('/', { // The path to your worker
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        url: youtubeUrl,
-                        language: language
-                    }),
+                    body: formData, // Send FormData, browser sets Content-Type automatically
                 });
 
                 if (!response.ok) {
@@ -117,7 +123,6 @@
 
         copyButton.addEventListener('click', () => {
             if (transcriptionOutput.value) {
-                // Using the Clipboard API
                 navigator.clipboard.writeText(transcriptionOutput.value).then(() => {
                     copyButton.textContent = 'Copied!';
                     setTimeout(() => {
@@ -125,17 +130,6 @@
                     }, 2000);
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
-                    // Fallback for older browsers
-                    try {
-                        transcriptionOutput.select();
-                        document.execCommand('copy');
-                        copyButton.textContent = 'Copied!';
-                         setTimeout(() => {
-                            copyButton.textContent = 'Copy';
-                        }, 2000);
-                    } catch (e) {
-                         console.error('Fallback copy failed', e);
-                    }
                 });
             }
         });
