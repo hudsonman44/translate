@@ -117,49 +117,40 @@ const HTML_CONTENT = `
     } catch (error) {
         errorMessage.textContent = `Error: ${error.message}`;
         errorMessage.classList.remove('hidden');
-    } finally {
-        translateButton.disabled = false;
-        buttonText.textContent = 'Transcribe & Translate';
-        loadingSpinner.classList.add('hidden');
-    }
-}
             event.preventDefault();
 
             const file = audioFileInput.files[0];
+            const language = languageSelect.value;
             if (!file) {
-                errorMessage.textContent = 'Please select a file to upload.';
+                errorMessage.textContent = "Please upload a file.";
                 errorMessage.classList.remove('hidden');
                 return;
             }
 
-            translationOutput.value = '';
             errorMessage.classList.add('hidden');
-            errorMessage.textContent = '';
             translateButton.disabled = true;
-            buttonText.textContent = 'Translating...';
+            buttonText.textContent = 'Processing...';
             loadingSpinner.classList.remove('hidden');
 
             const formData = new FormData();
-            formData.append('audio', file);
-            formData.append('language', languageSelect.value);
+            formData.append('audio', file); // Must be 'audio' to match backend
+            formData.append('language', language);
 
             try {
-                const response = await fetch(request.url, { // Post to the same worker URL
+                const response = await fetch('/', {
                     method: 'POST',
-                    body: formData,
+                    body: formData
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || \`HTTP error! status: \${response.status}\`);
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                translationOutput.value = data.translated_text;
-
+                translationOutput.value = data.translated_text || JSON.stringify(data);
             } catch (error) {
-                console.error('Translation error:', error);
-                errorMessage.textContent = \`Error: \${error.message}\`;
+                errorMessage.textContent = `Error: ${error.message}`;
                 errorMessage.classList.remove('hidden');
             } finally {
                 translateButton.disabled = false;
