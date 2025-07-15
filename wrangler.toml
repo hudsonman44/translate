@@ -1,4 +1,4 @@
-name = "youtube-transcriber"
+name = "translate"
 main = "src/index.js" # or wherever your worker file is
 compatibility_date = "2023-11-21"
 
