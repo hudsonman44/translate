@@ -1,7 +1,8 @@
 /**
  * Welcome to Cloudflare Workers!
- * This worker serves the HTML interface on GET requests and handles
- * audio file uploads for transcription on POST requests.
+ * This worker serves the HTML interface on GET requests. On POST requests,
+ * it transcribes audio to English with Whisper, then translates the
+ * resulting text to a target language with M2M100.
  */
 
 // The HTML content is now part of the worker script.
@@ -11,7 +12,7 @@ const HTML_CONTENT = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio File Transcription</title>
+    <title>Audio File Translation</title>
     <script src="https://cdn.tailwindcss.com"><\/script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -27,27 +28,26 @@ const HTML_CONTENT = `
 <body class="bg-gray-100 text-gray-800">
     <div class="container mx-auto max-w-2xl px-4 py-12">
         <div class="bg-white rounded-2xl shadow-lg p-8">
-            <h1 class="text-3xl font-bold text-center mb-2 text-gray-900">Audio File Transcription</h1>
-            <p class="text-center text-gray-500 mb-8">Upload an audio or video file to transcribe its content.</p>
+            <h1 class="text-3xl font-bold text-center mb-2 text-gray-900">Audio File Translation</h1>
+            <p class="text-center text-gray-500 mb-8">Upload a file to transcribe its audio to English and then translate it.</p>
 
-            <form id="transcription-form" class="space-y-6">
+            <form id="translation-form" class="space-y-6">
                 <div>
                     <label for="audio-file" class="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
                     <input type="file" id="audio-file" name="audio-file" class="w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer" accept="audio/*,video/mp4" required>
                 </div>
 
                 <div>
-                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language (Optional)</label>
+                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Translate to Language</label>
                     <select id="language" name="language" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <option value="en">English</option>
                         <option value="es">Spanish</option>
+                        <option value="en">English</option>
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Whisper will auto-detect the language, but you can provide a hint.</p>
                 </div>
 
                 <div>
                     <button type="submit" id="translate-button" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 ease-in-out flex items-center justify-center">
-                        <span id="button-text">Transcribe</span>
+                        <span id="button-text">Transcribe & Translate</span>
                         <div id="loading-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white ml-3"></div>
                     </button>
                 </div>
@@ -56,9 +56,9 @@ const HTML_CONTENT = `
             <div id="error-message" class="hidden mt-6 p-4 bg-red-100 text-red-700 rounded-lg"></div>
 
             <div class="mt-8">
-                <label for="transcription-output" class="block text-sm font-medium text-gray-700 mb-1">Transcription</label>
+                <label for="translation-output" class="block text-sm font-medium text-gray-700 mb-1">Translation</label>
                 <div class="relative">
-                    <textarea id="transcription-output" readonly class="w-full h-64 p-4 border border-gray-300 rounded-lg bg-gray-50 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Transcription will appear here..."></textarea>
+                    <textarea id="translation-output" readonly class="w-full h-64 p-4 border border-gray-300 rounded-lg bg-gray-50 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Translated text will appear here..."></textarea>
                     <button id="copy-button" class="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-1 px-3 rounded-lg text-sm transition-all duration-200">
                         Copy
                     </button>
@@ -71,17 +71,17 @@ const HTML_CONTENT = `
     </div>
 
     <script>
-        const transcriptionForm = document.getElementById('transcription-form');
+        const translationForm = document.getElementById('translation-form');
         const audioFileInput = document.getElementById('audio-file');
         const languageSelect = document.getElementById('language');
-        const transcriptionOutput = document.getElementById('transcription-output');
+        const translationOutput = document.getElementById('translation-output');
         const translateButton = document.getElementById('translate-button');
         const buttonText = document.getElementById('button-text');
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorMessage = document.getElementById('error-message');
         const copyButton = document.getElementById('copy-button');
 
-        transcriptionForm.addEventListener('submit', async (event) => {
+        translationForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
             const file = audioFileInput.files[0];
@@ -91,11 +91,11 @@ const HTML_CONTENT = `
                 return;
             }
 
-            transcriptionOutput.value = '';
+            translationOutput.value = '';
             errorMessage.classList.add('hidden');
             errorMessage.textContent = '';
             translateButton.disabled = true;
-            buttonText.textContent = 'Transcribing...';
+            buttonText.textContent = 'Translating...';
             loadingSpinner.classList.remove('hidden');
 
             const formData = new FormData();
@@ -114,22 +114,22 @@ const HTML_CONTENT = `
                 }
 
                 const data = await response.json();
-                transcriptionOutput.value = data.text;
+                translationOutput.value = data.translated_text;
 
             } catch (error) {
-                console.error('Transcription error:', error);
+                console.error('Translation error:', error);
                 errorMessage.textContent = \`Error: \${error.message}\`;
                 errorMessage.classList.remove('hidden');
             } finally {
                 translateButton.disabled = false;
-                buttonText.textContent = 'Transcribe';
+                buttonText.textContent = 'Transcribe & Translate';
                 loadingSpinner.classList.add('hidden');
             }
         });
 
         copyButton.addEventListener('click', () => {
-            if (transcriptionOutput.value) {
-                navigator.clipboard.writeText(transcriptionOutput.value).then(() => {
+            if (translationOutput.value) {
+                navigator.clipboard.writeText(translationOutput.value).then(() => {
                     copyButton.textContent = 'Copied!';
                     setTimeout(() => {
                         copyButton.textContent = 'Copy';
@@ -156,12 +156,12 @@ export default {
             });
         }
 
-        // Handle POST requests for transcription
+        // Handle POST requests for transcription and translation
         if (request.method === 'POST') {
             try {
                 const formData = await request.formData();
                 const audioFile = formData.get('audio');
-                const language = formData.get('language');
+                const targetLang = formData.get('language');
 
                 if (!audioFile || typeof audioFile === 'string') {
                     return new Response(JSON.stringify({
@@ -177,13 +177,35 @@ export default {
                 const audioBuffer = await audioFile.arrayBuffer();
                 const audioArray = [...new Uint8Array(audioBuffer)];
 
-                const inputs = {
+                // Step 1: Transcribe audio to English text using Whisper
+                const whisperInputs = {
                     audio: audioArray
                 };
+                const transcription = await env.AI.run('@cf/openai/whisper', whisperInputs);
 
-                const response = await env.AI.run('@cf/openai/whisper', inputs);
+                if (!transcription.text) {
+                     return new Response(JSON.stringify({
+                        error: 'Failed to transcribe audio.'
+                    }), {
+                        status: 500,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+                
+                const englishText = transcription.text;
 
-                return new Response(JSON.stringify(response), {
+                // Step 2: Translate the English text to the target language
+                const translationInputs = {
+                    text: englishText,
+                    source_lang: 'en',
+                    target_lang: targetLang
+                };
+                
+                const translation = await env.AI.run('@cf/meta/m2m100-1.2b', translationInputs);
+
+                return new Response(JSON.stringify(translation), {
                     status: 200,
                     headers: {
                         'Content-Type': 'application/json'
@@ -191,7 +213,7 @@ export default {
                 });
 
             } catch (error) {
-                console.error('Error processing transcription request:', error);
+                console.error('Error processing request:', error);
                 const errorMessage = error.message || 'An internal error occurred.';
                 return new Response(JSON.stringify({
                     error: errorMessage
