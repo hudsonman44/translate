@@ -1,0 +1,20 @@
+name = "youtube-transcriber"
+main = "src/index.js" # or wherever your worker file is
+compatibility_date = "2023-11-21"
+
+# AI binding for Whisper model
+# This allows your worker to access the Whisper model via the `env.AI` object.
+[ai]
+binding = "AI"
+
+# Note on serving the frontend:
+# For a complete solution, you would typically use Cloudflare Pages to host your HTML/JS/CSS
+# and have it communicate with your Worker API.
+#
+# To do this:
+# 1. Create a new Cloudflare Pages project.
+# 2. Connect it to the repository containing your `index.html`.
+# 3. In the Pages project settings, under "Functions", add a binding to this Worker service.
+#
+# This setup separates the static frontend from the serverless backend, which is a best practice.
+# The `fetch` in the HTML will then call the deployed worker URL.
