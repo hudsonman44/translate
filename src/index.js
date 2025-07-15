@@ -134,17 +134,9 @@ copyButton.addEventListener('click', () => {
                 setTimeout(() => {
                     copyButton.textContent = 'Copy';
                 }, 2000);
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-    }
-});
-    <\/script>
 </body>
 </html>
 `;
-
 
 export default {
     async fetch(request, env, ctx) {
