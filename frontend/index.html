@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translate Audio</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.09); }
+        h1 { text-align: center; color: #333; }
+        .input-group { margin-bottom: 1.5em; }
+        label { display: block; margin-bottom: 0.5em; font-weight: bold; }
+        input[type="file"], select, textarea { width: 100%; padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 0.7em 2em; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        button:disabled { background: #aaa; }
+        .output-group { margin-top: 2em; }
+        .hidden { display: none; }
+        .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .error { color: #d9534f; margin-top: 1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Transcribe & Translate Audio</h1>
+        <div class="input-group">
+            <label for="audioInput">Upload audio file</label>
+            <input type="file" id="audioInput" accept="audio/*">
+        </div>
+        <div class="input-group">
+            <label for="languageSelect">Target language</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+                <!-- Add more languages as needed -->
+            </select>
+        </div>
+        <button id="translateButton">
+            <span id="buttonText">Transcribe & Translate</span>
+            <span id="loadingSpinner" class="spinner hidden"></span>
+        </button>
+        <div class="output-group">
+            <label for="translationOutput">Translation</label>
+            <textarea id="translationOutput" rows="4" readonly></textarea>
+            <button id="copyButton">Copy</button>
+            <div id="errorMessage" class="error hidden"></div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

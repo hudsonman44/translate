@@ -8,19 +8,8 @@
 
 export default {
     async fetch(request, env, ctx) {
-        // Handle GET requests by serving the HTML page
-        if (request.method === 'GET') {
-    // Read and serve the static HTML file
-    const html = await fetch(new URL('./index.html', import.meta.url)).then(res => res.text());
-    return new Response(html, {
-        headers: {
-            'Content-Type': 'text/html;charset=UTF-8',
-        },
-    });
-}
-
-        // Handle POST requests for transcription and translation
-        if (request.method === 'POST') {
+        const url = new URL(request.url);
+        if (request.method === 'POST' && url.pathname === '/api/translate') {
             try {
                 const formData = await request.formData();
                 const audioFile = formData.get('audio');
