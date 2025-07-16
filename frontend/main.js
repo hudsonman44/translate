@@ -26,7 +26,7 @@ translateButton.addEventListener('click', async () => {
     formData.append('language', language);
     try {
         // IMPORTANT: Update the endpoint URL to your deployed Worker API
-        const response = await fetch('https://YOUR-WORKER-SUBDOMAIN.workers.dev/api/translate', {
+        const response = await fetch('https://translate.lab-account-850.workers.dev/api/translate', {
             method: 'POST',
             body: formData
         });
