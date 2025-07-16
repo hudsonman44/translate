@@ -13,7 +13,7 @@ const HTML_CONTENT = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio File Translation</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -81,62 +81,66 @@ const HTML_CONTENT = `
         const errorMessage = document.getElementById('error-message');
         const copyButton = document.getElementById('copy-button');
 
-translationForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
+        translationForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-    const file = audioFileInput.files[0];
-    const language = languageSelect.value;
-    if (!file) {
-        errorMessage.textContent = "Please upload a file.";
-        errorMessage.classList.remove('hidden');
-        return;
-    }
+            const file = audioFileInput.files[0];
+            const language = languageSelect.value;
+            if (!file) {
+                errorMessage.textContent = "Please upload a file.";
+                errorMessage.classList.remove('hidden');
+                return;
+            }
 
-    errorMessage.classList.add('hidden');
-    translateButton.disabled = true;
-    buttonText.textContent = 'Processing...';
-    loadingSpinner.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            translateButton.disabled = true;
+            buttonText.textContent = 'Processing...';
+            loadingSpinner.classList.remove('hidden');
 
-    
+            const formData = new FormData();
+            formData.append('audio', file); // Must be 'audio' to match backend
+            formData.append('language', language);
 
-    const formData = new FormData();
-    formData.append('audio', file); // Must be 'audio' to match backend
-    formData.append('language', language);
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
 
-    try {
-        const response = await fetch('/', {
-            method: 'POST',
-            body: formData
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || \`HTTP error! status: \${response.status}\`);
+                }
+
+                const data = await response.json();
+                translationOutput.value = data.translated_text || JSON.stringify(data);
+            } catch (error) {
+                errorMessage.textContent = \`Error: \${error.message}\`;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                translateButton.disabled = false;
+                buttonText.textContent = 'Transcribe & Translate';
+                loadingSpinner.classList.add('hidden');
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || response.status);
-        }
-
-        const data = await response.json();
-        translationOutput.value = data.translated_text || JSON.stringify(data);
-    } catch (error) {
-        errorMessage.textContent = "Error: " + error.message;
-        errorMessage.classList.remove('hidden');
-    } finally {
-        translateButton.disabled = false;
-        buttonText.textContent = 'Transcribe & Translate';
-        loadingSpinner.classList.add('hidden');
-    }
-});
-
-copyButton.addEventListener('click', () => {
-    if (translationOutput.value) {
-        navigator.clipboard.writeText(translationOutput.value)
-            .then(() => {
-                copyButton.textContent = 'Copied!';
-                setTimeout(() => {
-                    copyButton.textContent = 'Copy';
-                }, 2000);
+        copyButton.addEventListener('click', () => {
+            if (translationOutput.value) {
+                navigator.clipboard.writeText(translationOutput.value).then(() => {
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            }
+        });
+    <\/script>
 </body>
 </html>
 `;
+
 
 export default {
     async fetch(request, env, ctx) {
