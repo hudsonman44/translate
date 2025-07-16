@@ -117,7 +117,7 @@ translationForm.addEventListener('submit', async (event) => {
         const data = await response.json();
         translationOutput.value = data.translated_text || JSON.stringify(data);
     } catch (error) {
-        errorMessage.textContent = 'Error: ' + error.message;
+        errorMessage.textContent = "Error: " + error.message;
         errorMessage.classList.remove('hidden');
     } finally {
         translateButton.disabled = false;
