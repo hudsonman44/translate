@@ -8,7 +8,7 @@ compatibility_date = "2023-11-21"
 binding = "AI"
 
 [observability.logs]
-enabled = false
+enabled = true
 
 # Note on serving the frontend:
 # For a complete solution, you would typically use Cloudflare Pages to host your HTML/JS/CSS
