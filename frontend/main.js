@@ -1,3 +1,17 @@
+// ffmpeg.wasm setup
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: true }); // log: true for debugging
+
+async function extractAudioFromVideo(file) {
+    if (!ffmpeg.isLoaded()) {
+        await ffmpeg.load();
+    }
+    ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+    await ffmpeg.run('-i', 'input.mp4', '-vn', '-acodec', 'mp3', 'output.mp3');
+    const audioData = ffmpeg.FS('readFile', 'output.mp3');
+    return new Blob([audioData.buffer], { type: 'audio/mp3' });
+}
+
 const audioInput = document.getElementById('audioInput');
 const languageSelect = document.getElementById('languageSelect');
 const translateButton = document.getElementById('translateButton');
@@ -10,12 +24,28 @@ const errorMessage = document.getElementById('errorMessage');
 translateButton.addEventListener('click', async () => {
     errorMessage.classList.add('hidden');
     translationOutput.value = '';
-    const file = audioInput.files[0];
+    let file = audioInput.files[0];
     const language = languageSelect.value;
     if (!file) {
-        errorMessage.textContent = 'Please upload an audio file.';
+        errorMessage.textContent = 'Please upload an audio or video file.';
         errorMessage.classList.remove('hidden');
         return;
+    }
+
+    // If the file is a video, extract audio before uploading
+    if (file.type.startsWith('video/')) {
+        buttonText.textContent = 'Extracting audio...';
+        loadingSpinner.classList.remove('hidden');
+        try {
+            file = await extractAudioFromVideo(file);
+        } catch (err) {
+            errorMessage.textContent = 'Failed to extract audio from video.';
+            errorMessage.classList.remove('hidden');
+            translateButton.disabled = false;
+            buttonText.textContent = 'Transcribe & Translate';
+            loadingSpinner.classList.add('hidden');
+            return;
+        }
     }
     errorMessage.classList.add('hidden');
     translateButton.disabled = true;
