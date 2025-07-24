@@ -33,7 +33,7 @@ export default {
                 const whisperInputs = {
                     audio: audioArray
                 };
-                const transcription = await env.AI.run('@cf/openai/whisper', whisperInputs);
+                const transcription = await env.AI.run('@cf/openai/whisper-large-v3-turbo', whisperInputs);
 
                 if (!transcription.text) {
                      return new Response(JSON.stringify({
@@ -82,7 +82,8 @@ export default {
         return new Response('Method Not Allowed', {
             status: 405,
             headers: {
-                'Allow': 'GET, POST'
+                'Allow': 'GET, POST',
+                'Access-Control-Allow-Origin': '*'
             }
         });
     },
