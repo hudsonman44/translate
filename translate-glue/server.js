@@ -11,19 +11,36 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware - Configure CORS for Cloudflare Pages
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',  // Keep HTTP for local development
-    'http://localhost:8080',  // Keep HTTP for local development
-    'https://localhost:3000', // HTTPS for local SSL testing
-    'https://localhost:8080', // HTTPS for local SSL testing 
-    'https://b23370b1.translate-19i.pages.dev', // Your current Pages domain
-    'https://translate.aaronbhudson.com', // Your current Pages domain
-    /\.pages\.dev$/, // Allow all *.pages.dev domains
-    /\.aaronbhudson\.com$/ // Allow your custom domain
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',  // Keep HTTP for local development
+      'http://localhost:8080',  // Keep HTTP for local development
+      'https://localhost:3000', // HTTPS for local SSL testing
+      'https://localhost:8080', // HTTPS for local SSL testing 
+      'https://b23370b1.translate-19i.pages.dev', // Your current Pages domain
+      'https://translate.aaronbhudson.com', // Your current Pages domain
+    ];
+    
+    // Check exact matches
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Check regex patterns
+    if (/\.pages\.dev$/.test(origin) || /\.aaronbhudson\.com$/.test(origin)) {
+      return callback(null, true);
+    }
+    
+    console.log('CORS blocked origin:', origin);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 };
 
 app.use(cors(corsOptions));
