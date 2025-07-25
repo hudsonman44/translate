@@ -1,5 +1,5 @@
 // Configuration for LXC middleware
-const LXC_API_URL = 'http://localhost:3001/api/process-and-translate';
+const LXC_API_URL = 'https:translate-glue.aaronbhudson.com:3001/api/process-and-translate';
 
 // Note: Update this URL to your actual LXC container IP when deployed
 // Example: const LXC_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
