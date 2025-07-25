@@ -1,8 +1,10 @@
 // Configuration for Glue middleware
-const GLUE_API_URL = 'https://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
+// Using HTTP for now - you'll need HTTPS for production with Cloudflare Pages
+const GLUE_API_URL = 'http://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
 
-// Note: Update this URL to your actual Glue server IP when deployed
-// Example: const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
+// For HTTPS (when SSL is configured): 
+// const GLUE_API_URL = 'https://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
+// Example for local testing: const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
 
 const audioInput = document.getElementById('audioInput');
 const languageSelect = document.getElementById('languageSelect');
@@ -40,7 +42,11 @@ translateButton.addEventListener('click', async () => {
         // Send to Glue middleware (handles conversion + translation)
         const response = await fetch(GLUE_API_URL, {
             method: 'POST',
-            body: formData
+            body: formData,
+            // Add headers for CORS if needed
+            headers: {
+                // Note: Don't set Content-Type for FormData, let browser set it
+            }
         });
 
         if (!response.ok) {
@@ -61,8 +67,10 @@ translateButton.addEventListener('click', async () => {
         console.error('Translation error:', error);
         let errorMsg = 'An error occurred during processing.';
         
-        if (error.message.includes('fetch')) {
-            errorMsg = 'Cannot connect to processing server. Please check if the Glue middleware is running.';
+        if (error.message.includes('fetch') || error.message.includes('CORS') || error.message.includes('network')) {
+            errorMsg = 'Cannot connect to processing server. This might be due to CORS policy or the Glue middleware not running. Check browser console for details.';
+        } else if (error.message.includes('Mixed Content')) {
+            errorMsg = 'Mixed content error: HTTPS page cannot access HTTP server. Please ensure your Glue server supports HTTPS.';
         } else {
             errorMsg = `Error: ${error.message}`;
         }

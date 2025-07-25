@@ -9,9 +9,25 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Middleware - Configure CORS for Cloudflare Pages
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:8080', 
+    'https://b23370b1.translate-19i.pages.dev', // Your current Pages domain
+    /\.pages\.dev$/, // Allow all *.pages.dev domains
+    /\.aaronbhudson\.com$/ // Allow your custom domain
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
