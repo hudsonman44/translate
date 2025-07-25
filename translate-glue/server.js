@@ -209,11 +209,54 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: error.message || 'Internal server error' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`FFmpeg Translation Middleware running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
-  console.log(`API endpoint: http://localhost:${PORT}/api/process-and-translate`);
+// Add startup logging and error handling
+console.log('🚀 Starting FFmpeg Translation Middleware...');
+console.log('📋 Environment check:');
+console.log('- Node.js version:', process.version);
+console.log('- Working directory:', process.cwd());
+console.log('- PATH:', process.env.PATH);
+console.log('- User:', process.env.USER || 'unknown');
+
+// Test FFmpeg availability at startup
+const { exec } = require('child_process');
+exec('which ffmpeg', (error, stdout, stderr) => {
+  if (error) {
+    console.error('❌ FFmpeg not found in PATH:', error.message);
+  } else {
+    console.log('✅ FFmpeg found at:', stdout.trim());
+  }
+});
+
+// Add process error handlers
+process.on('uncaughtException', (error) => {
+  console.error('🚨 Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Start server with error handling
+const server = app.listen(PORT, (error) => {
+  if (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+  
+  console.log('✅ FFmpeg Translation Middleware running on port', PORT);
+  console.log('🏥 Health check: http://localhost:' + PORT + '/health');
+  console.log('🔧 API endpoint: http://localhost:' + PORT + '/api/process-and-translate');
+  console.log('📅 Started at:', new Date().toISOString());
+});
+
+server.on('error', (error) => {
+  console.error('🚨 Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error('❌ Port', PORT, 'is already in use!');
+  }
+  process.exit(1);
 });
 
 module.exports = app;
