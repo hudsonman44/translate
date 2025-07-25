@@ -7,7 +7,7 @@ This guide shows you how to deploy the `translate-glue` middleware directly from
 Once you push your code to GitHub, users can install with a single command:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR-USERNAME/translate/main/translate-glue/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/hudsonman44/translate/main/translate-glue/install.sh | sudo bash
 ```
 
 ## 📋 Prerequisites
