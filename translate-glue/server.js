@@ -12,8 +12,10 @@ const PORT = process.env.PORT || 3001;
 // Middleware - Configure CORS for Cloudflare Pages
 const corsOptions = {
   origin: [
-    'http://localhost:3000',
-    'http://localhost:8080', 
+    'http://localhost:3000',  // Keep HTTP for local development
+    'http://localhost:8080',  // Keep HTTP for local development
+    'https://localhost:3000', // HTTPS for local SSL testing
+    'https://localhost:8080', // HTTPS for local SSL testing 
     'https://b23370b1.translate-19i.pages.dev', // Your current Pages domain
     'https://translate.aaronbhudson.com', // Your current Pages domain
     /\.pages\.dev$/, // Allow all *.pages.dev domains

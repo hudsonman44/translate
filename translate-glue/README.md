@@ -76,10 +76,10 @@ Update the `GLUE_API_URL` in your frontend `main.js`:
 
 ```javascript
 // For local development
-const GLUE_API_URL = 'http://localhost:3001/api/process-and-translate';
+const GLUE_API_URL = 'http://localhost:3001/api/process-and-translate'; // HTTP for local development
 
 // For production (replace with your Ubuntu server IP)
-const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
+const GLUE_API_URL = 'https://your-domain.com:3001/api/process-and-translate'; // HTTPS for production
 ```
 
 ## API Endpoints

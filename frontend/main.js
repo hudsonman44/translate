@@ -1,10 +1,10 @@
 // Configuration for Glue middleware
 // Using HTTP for now - you'll need HTTPS for production with Cloudflare Pages
-const GLUE_API_URL = 'http://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
+const GLUE_API_URL = 'https://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
 
 // For HTTPS (when SSL is configured): 
 // const GLUE_API_URL = 'https://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
-// Example for local testing: const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
+// Example for local testing: const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate'; // Keep HTTP for local development
 
 const audioInput = document.getElementById('audioInput');
 const languageSelect = document.getElementById('languageSelect');
