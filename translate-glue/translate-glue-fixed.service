@@ -1,0 +1,27 @@
+[Unit]
+Description=Translate Glue Middleware
+After=network.target
+
+[Service]
+Type=simple
+User=ahudson
+WorkingDirectory=/opt/translate-glue
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+
+# Environment variables
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=translate-glue
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
