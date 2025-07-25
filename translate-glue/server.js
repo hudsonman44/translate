@@ -12,8 +12,13 @@ const PORT = process.env.PORT || 3001;
 // Middleware - Configure CORS for Cloudflare Pages
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('🔍 CORS check for origin:', origin);
+    
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('✅ CORS: Allowing request with no origin');
+      return callback(null, true);
+    }
     
     const allowedOrigins = [
       'http://localhost:3000',  // Keep HTTP for local development
@@ -26,15 +31,18 @@ const corsOptions = {
     
     // Check exact matches
     if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS: Origin allowed (exact match):', origin);
       return callback(null, true);
     }
     
     // Check regex patterns
     if (/\.pages\.dev$/.test(origin) || /\.aaronbhudson\.com$/.test(origin)) {
+      console.log('✅ CORS: Origin allowed (regex match):', origin);
       return callback(null, true);
     }
     
-    console.log('CORS blocked origin:', origin);
+    console.log('❌ CORS: Origin BLOCKED:', origin);
+    console.log('📋 CORS: Allowed origins:', allowedOrigins);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
