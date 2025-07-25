@@ -15,6 +15,7 @@ const corsOptions = {
     'http://localhost:3000',
     'http://localhost:8080', 
     'https://b23370b1.translate-19i.pages.dev', // Your current Pages domain
+    'https://translate.aaronbhudson.com', // Your current Pages domain
     /\.pages\.dev$/, // Allow all *.pages.dev domains
     /\.aaronbhudson\.com$/ // Allow your custom domain
   ],
