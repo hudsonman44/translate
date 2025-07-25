@@ -1,16 +1,8 @@
-// ffmpeg.wasm setup
-const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log: true }); // log: true for debugging
+// Configuration for LXC middleware
+const LXC_API_URL = 'http://localhost:3001/api/process-and-translate';
 
-async function extractAudioFromVideo(file) {
-    if (!ffmpeg.isLoaded()) {
-        await ffmpeg.load();
-    }
-    ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
-    await ffmpeg.run('-i', 'input.mp4', '-vn', '-acodec', 'mp3', 'output.mp3');
-    const audioData = ffmpeg.FS('readFile', 'output.mp3');
-    return new Blob([audioData.buffer], { type: 'audio/mp3' });
-}
+// Note: Update this URL to your actual LXC container IP when deployed
+// Example: const LXC_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
 
 const audioInput = document.getElementById('audioInput');
 const languageSelect = document.getElementById('languageSelect');
@@ -24,52 +16,61 @@ const errorMessage = document.getElementById('errorMessage');
 translateButton.addEventListener('click', async () => {
     errorMessage.classList.add('hidden');
     translationOutput.value = '';
-    let file = audioInput.files[0];
+    const file = audioInput.files[0];
     const language = languageSelect.value;
+    
     if (!file) {
         errorMessage.textContent = 'Please upload an audio or video file.';
         errorMessage.classList.remove('hidden');
         return;
     }
 
-    // If the file is a video, extract audio before uploading
-    if (file.type.startsWith('video/')) {
-        buttonText.textContent = 'Extracting audio...';
-        loadingSpinner.classList.remove('hidden');
-        try {
-            file = await extractAudioFromVideo(file);
-        } catch (err) {
-            errorMessage.textContent = 'Failed to extract audio from video.';
-            errorMessage.classList.remove('hidden');
-            translateButton.disabled = false;
-            buttonText.textContent = 'Transcribe & Translate';
-            loadingSpinner.classList.add('hidden');
-            return;
-        }
-    }
-    errorMessage.classList.add('hidden');
+    // Disable button and show loading state
     translateButton.disabled = true;
     buttonText.textContent = 'Processing...';
     loadingSpinner.classList.remove('hidden');
-    const formData = new FormData();
-    formData.append('audio', file); // Must be 'audio' to match backend
-    formData.append('language', language);
+    errorMessage.classList.add('hidden');
+
     try {
-        // IMPORTANT: Update the endpoint URL to your deployed Worker API
-        const response = await fetch('https://translate.lab-account-850.workers.dev/api/translate', {
+        // Create FormData to send to LXC middleware
+        const formData = new FormData();
+        formData.append('media', file); // Changed from 'audio' to 'media' to match LXC API
+        formData.append('language', language);
+
+        // Send to LXC middleware (handles conversion + translation)
+        const response = await fetch(LXC_API_URL, {
             method: 'POST',
             body: formData
         });
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
+
         const data = await response.json();
-        translationOutput.value = data.translated_text || JSON.stringify(data);
+        
+        // Display the translation result
+        if (data.success && data.translation) {
+            translationOutput.value = data.translation.translated_text || JSON.stringify(data.translation);
+        } else {
+            throw new Error('Invalid response format from server');
+        }
+
     } catch (error) {
-        errorMessage.textContent = `Error: ${error.message}`;
+        console.error('Translation error:', error);
+        let errorMsg = 'An error occurred during processing.';
+        
+        if (error.message.includes('fetch')) {
+            errorMsg = 'Cannot connect to processing server. Please check if the LXC middleware is running.';
+        } else {
+            errorMsg = `Error: ${error.message}`;
+        }
+        
+        errorMessage.textContent = errorMsg;
         errorMessage.classList.remove('hidden');
     } finally {
+        // Reset button state
         translateButton.disabled = false;
         buttonText.textContent = 'Transcribe & Translate';
         loadingSpinner.classList.add('hidden');

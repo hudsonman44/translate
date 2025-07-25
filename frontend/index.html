@@ -24,8 +24,8 @@
     <div class="container">
         <h1>Transcribe & Translate Audio</h1>
         <div class="input-group">
-            <label for="audioInput">Upload audio file</label>
-            <input type="file" id="audioInput" accept="audio/*">
+            <label for="audioInput">Upload audio or video file</label>
+            <input type="file" id="audioInput" accept="audio/*,video/*">
         </div>
         <div class="input-group">
             <label for="languageSelect">Target language</label>
@@ -50,7 +50,6 @@
             <div id="errorMessage" class="error hidden"></div>
         </div>
     </div>
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
