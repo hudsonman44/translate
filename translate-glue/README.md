@@ -72,14 +72,14 @@ sudo ./deploy-ubuntu.sh
 
 ### Frontend Configuration
 
-Update the `LXC_API_URL` in your frontend `main.js`:
+Update the `GLUE_API_URL` in your frontend `main.js`:
 
 ```javascript
 // For local development
-const LXC_API_URL = 'http://localhost:3001/api/process-and-translate';
+const GLUE_API_URL = 'http://localhost:3001/api/process-and-translate';
 
 // For production (replace with your Ubuntu server IP)
-const LXC_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
+const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
 ```
 
 ## API Endpoints

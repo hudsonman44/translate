@@ -1,7 +1,7 @@
 {
   "name": "ffmpeg-translation-middleware",
   "version": "1.0.0",
-  "description": "LXC middleware app for video conversion and translation",
+  "description": "Glue middleware app for video conversion and translation",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

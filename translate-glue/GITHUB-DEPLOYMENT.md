@@ -91,7 +91,7 @@ In your frontend `main.js`, update the API URL:
 
 ```javascript
 // Replace with your Ubuntu server's IP address
-const LXC_API_URL = 'http://YOUR-SERVER-IP:3001/api/process-and-translate';
+const GLUE_API_URL = 'http://YOUR-SERVER-IP:3001/api/process-and-translate';
 ```
 
 ## 🧪 Testing the Installation

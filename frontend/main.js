@@ -1,8 +1,8 @@
-// Configuration for LXC middleware
-const LXC_API_URL = 'https:translate-glue.aaronbhudson.com:3001/api/process-and-translate';
+// Configuration for Glue middleware
+const GLUE_API_URL = 'https://translate-glue.aaronbhudson.com:3001/api/process-and-translate';
 
-// Note: Update this URL to your actual LXC container IP when deployed
-// Example: const LXC_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
+// Note: Update this URL to your actual Glue server IP when deployed
+// Example: const GLUE_API_URL = 'http://192.168.1.100:3001/api/process-and-translate';
 
 const audioInput = document.getElementById('audioInput');
 const languageSelect = document.getElementById('languageSelect');
@@ -32,13 +32,13 @@ translateButton.addEventListener('click', async () => {
     errorMessage.classList.add('hidden');
 
     try {
-        // Create FormData to send to LXC middleware
+        // Create FormData to send to Glue middleware
         const formData = new FormData();
-        formData.append('media', file); // Changed from 'audio' to 'media' to match LXC API
+        formData.append('media', file); // Changed from 'audio' to 'media' to match Glue API
         formData.append('language', language);
 
-        // Send to LXC middleware (handles conversion + translation)
-        const response = await fetch(LXC_API_URL, {
+        // Send to Glue middleware (handles conversion + translation)
+        const response = await fetch(GLUE_API_URL, {
             method: 'POST',
             body: formData
         });
@@ -62,7 +62,7 @@ translateButton.addEventListener('click', async () => {
         let errorMsg = 'An error occurred during processing.';
         
         if (error.message.includes('fetch')) {
-            errorMsg = 'Cannot connect to processing server. Please check if the LXC middleware is running.';
+            errorMsg = 'Cannot connect to processing server. Please check if the Glue middleware is running.';
         } else {
             errorMsg = `Error: ${error.message}`;
         }
