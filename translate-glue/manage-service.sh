@@ -2,7 +2,7 @@
 
 # Service Management Script for FFmpeg Translation Middleware
 
-APP_NAME="ffmpeg-translation-middleware"
+APP_NAME="translate-glue"
 
 show_usage() {
     echo "Usage: $0 {start|stop|restart|status|logs|config|health|uninstall}"
@@ -103,7 +103,7 @@ case "$1" in
             rm -rf /var/log/$APP_NAME
             
             # Remove service user
-            userdel ffmpeg-service 2>/dev/null || true
+            userdel translate-glue 2>/dev/null || true
             
             # Reload systemd
             systemctl daemon-reload

@@ -15,9 +15,9 @@ fi
 
 # Get the current directory (where the script is located)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_NAME="ffmpeg-translation-middleware"
+APP_NAME="translate-glue"
 APP_DIR="/opt/$APP_NAME"
-SERVICE_USER="ffmpeg-service"
+SERVICE_USER="translate-glue"
 
 echo "Script directory: $SCRIPT_DIR"
 echo "Target directory: $APP_DIR"
@@ -84,7 +84,7 @@ chmod -R 755 /var/log/$APP_NAME
 # Create environment file
 echo "Creating environment configuration..."
 cat > /etc/default/$APP_NAME << EOF
-# FFmpeg Translation Middleware Environment Configuration
+# Translate Glue Middleware Environment Configuration
 NODE_ENV=production
 PORT=3001
 CLOUDFLARE_WORKER_URL=https://translate.lab-account-850.workers.dev/api/translate
@@ -98,8 +98,8 @@ EOF
 echo "Creating systemd service..."
 cat > /etc/systemd/system/$APP_NAME.service << EOF
 [Unit]
-Description=FFmpeg Translation Middleware
-Documentation=https://github.com/your-repo/ffmpeg-translation-middleware
+Description=Translate Glue Middleware
+Documentation=https://github.com/YOUR-USERNAME/translate
 After=network.target
 Wants=network.target
 
