@@ -6,7 +6,7 @@
 set -e
 
 APP_NAME="translate-glue"
-GITHUB_USER="YOUR-USERNAME"  # Replace with your GitHub username
+GITHUB_USER="hudsonman44"  # Replace with your GitHub username
 GITHUB_REPO="translate"      # Replace with your repository name
 GITHUB_BRANCH="main"         # Replace with your branch name
 INSTALL_DIR="/tmp/$APP_NAME-install"
